@@ -98,8 +98,24 @@ const runAction = () => {
 		setEnv("CSC_LINK", getInput("mac_certs"));
 		setEnv("CSC_KEY_PASSWORD", getInput("mac_certs_password"));
 	} else if (platform === "windows") {
-		setEnv("CSC_LINK", getInput("windows_certs"));
-		setEnv("CSC_KEY_PASSWORD", getInput("windows_certs_password"));
+		const windowsCerts = getInput("windows_certs");
+		const windowsCertsPassword = getInput("windows_certs_password");
+		const windowsTenantId = getInput("windows_tenant_id");
+		const windowsClientId = getInput("windows_client_id");
+		const windowsClientSecret = getInput("windows_client_secret");
+
+		if (windowsCerts && windowsCertsPassword) {
+			log("Configuring build for legacy Windows app signing");
+			setEnv("CSC_LINK", windowsCerts);
+			setEnv("CSC_KEY_PASSWORD", windowsCertsPassword);
+		} else if (windowsTenantId && windowsClientId && windowsClientSecret) {
+			log("Configuring build for Windows Azure artifact signing");
+			setEnv("AZURE_TENANT_ID", windowsTenantId);
+			setEnv("AZURE_CLIENT_ID", windowsClientId);
+			setEnv("AZURE_CLIENT_SECRET", windowsClientSecret);
+		} else {
+			log("Missing Windows app signing information");
+		}
 	}
 
 	// Disable console advertisements during install phase
